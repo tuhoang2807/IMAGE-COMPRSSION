@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kho Ảnh</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/anh.css" />
+  </head>
+  <body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <a href="#"><i class="bi bi-images text-danger fs-2"></i></a>
+      <a href="./index.html"><i class="bi bi-house-door"></i></a>
+      <a href="./upload.html"><i class="bi bi-plus-circle"></i></a>
+      <a href="./profile.html"><i class="bi bi-person"></i></a>
+      <a href="#" onclick="toggleSidebar()"><i class="bi bi-gear"></i></a>
+    </div>
+
+    <!-- Overlay -->
+    <div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar Cài đặt -->
+    <div id="settingsSidebar" class="settings-sidebar">
+      <button class="close-btn btn btn-light" onclick="toggleSidebar()">
+        ✖
+      </button>
+      <a href="register.html" class="btn btn-danger w-100 mt-3">Đăng xuất</a>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content">
+      <!-- Header -->
+      <nav class="navbar">
+        <div class="search-container">
+          <i class="bi bi-search"></i>
+          <input type="text" class="search-box" placeholder="Tìm kiếm" />
+        </div>
+        <div class="user-info">
+          <span class="user-avatar">N</span>
+        </div>
+      </nav>
+
+      <!-- Image grid -->
+      <div class="grid" id="imageGrid"></div>
+    </div>
+
+    <div id="imageModal" class="modal">
+      <div class="modal-content">
+        <!-- Phần bên trái: Hiển thị ảnh -->
+        <div class="modal-left">
+          <img id="modalImage" src="" alt="Chi tiết ảnh" />
+        </div>
+
+        <!-- Phần bên phải: Thông tin ảnh -->
+        <div class="modal-right">
+          <!-- Hàng trên: Nút Tim, Lưu -->
+          <div class="top-buttons">
+            <button class="like-btn" id="likeButton">
+              <i class="bi bi-heart"></i>
+            </button>
+            <button class="save-btn" id="saveButton">Lưu</button>
+          </div>
+
+          <!-- Tiêu đề & Mô tả -->
+          <div class="user-info">
+            <p id="modalUsername" class="username"></p>
+          </div>
+
+          <h2 id="modalTitle"></h2>
+          <p id="modalDescription"></p>
+        </div>
+      </div>
+
+      <!-- Nút đóng modal -->
+      <button class="close" id="closeModal">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <script src="script.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        const userData = localStorage.getItem("userData");
+        if (!userData) {
+          window.location.href = "/login.html";
+          return;
+        }
+        let likedPosts = [];
+
+        const userObject = JSON.parse(userData);
+        const token = userObject.token;
+        const userId = userObject.user.id;
+
+        const apiUrl = "http://localhost:5000/api/images";
+        const grid = $(".grid");
+        const searchBox = $(".search-box");
+        const imageModal = $("#imageModal");
+        const likeButton = $("#likeButton");
+        const saveButton = $("#saveButton");
+        let searchTimeout;
+
+        //Hàm lấy danh sách ảnh đã like
+        function fetchUserLikedPosts() {
+          $.get(`${apiUrl}/liked-posts/${userId}`, function (data) {
+            if (data.success) {
+              likedPosts = data.likedPosts
+              console.log(likedPosts)
+            } else {
+              console.log("không tìm thấy")
+            }
+          }).fail(function (error) {
+            console.error("Lỗi khi lấy dữ liệu từ API:", error);
+          });
+        }
+
+        // Hàm lấy danh sách ảnh từ API
+        function fetchImages(keyword = "") {
+          let url = keyword
+            ? `${apiUrl}/search?keyword=${encodeURIComponent(keyword)}`
+            : `${apiUrl}/posts`;
+
+          $.get(url, function (data) {
+            if (data.success && data.posts.length > 0) {
+              updateImageGrid(data.posts);
+            } else {
+              grid.html("<p>Không tìm thấy ảnh nào.</p>");
+            }
+          }).fail(function (error) {
+            console.error("Lỗi khi lấy dữ liệu từ API:", error);
+          });
+        }
+
+        // Hàm cập nhật giao diện danh sách ảnh
+        function updateImageGrid(posts) {
+          grid.empty();
+          posts.forEach((post) => {
+            const img = $("<img>", {
+              src: post.image_url,
+              alt: "Ảnh",
+              "data-username": post.username,
+              "data-id": post.post_id,
+              "data-title": post.title?.trim() || "Không có tiêu đề",
+              "data-description": post.description || "Không có mô tả",
+              "data-image_url": post.image_url 
+            });
+
+            // Khi click vào ảnh, hiển thị modal
+            img.on("click", function () {
+              $("#modalUsername").text($(this).data("username"));
+              $("#modalImage").attr("src", $(this).attr("src"));
+              $("#modalTitle").text($(this).data("title"));
+              $("#modalDescription").text($(this).data("description"));
+              likeButton.data("id", $(this).data("id"));
+              saveButton.data("image_url", $(this).data("image_url"));
+              imageModal.addClass("show");
+          
+              const postId = $(this).data("id");
+          
+              const isLiked = likedPosts.some(post => post.post_id == postId);
+              console.log(isLiked,"tú hồng hồng");
+          
+              if (isLiked) {
+                  likeButton.addClass("liked");
+              } else {
+                  likeButton.removeClass("liked");
+              }
+          });
+          
+
+            grid.append(img);
+          });
+        }
+
+        // Xử lý tìm kiếm với debounce (300ms)
+        searchBox.on("input", function () {
+          clearTimeout(searchTimeout);
+          const keyword = $(this).val().trim();
+
+          if (keyword.length === 0) {
+            fetchImages(""); // Nếu rỗng thì hiển thị danh sách ảnh gốc
+            return;
+          }
+
+          searchTimeout = setTimeout(() => {
+            fetchImages(keyword);
+          }, 300);
+        });
+
+        // Đóng modal khi click nút đóng
+        $("#closeModal").on("click", function () {
+          imageModal.removeClass("show");
+        });
+
+        // Đóng modal khi click ra ngoài nội dung modal
+        imageModal.on("click", function (e) {
+          if (e.target === this) {
+            $(this).removeClass("show");
+          }
+        });
+
+        saveButton.on("click", async function() {
+          const imgUrl = $(this).data("image_url");
+      console.log(imgUrl,"tú hồng");
+          try {
+              const response = await fetch(`http://localhost:5000/api/images/download-image?imageUrl=${encodeURIComponent(imgUrl)}`);
+              if (!response.ok) throw new Error("Lỗi khi tải ảnh");
+      
+              const blob = await response.blob();
+              const link = document.createElement("a");
+              link.href = URL.createObjectURL(blob);
+              link.download = "downloaded_image.webp"; // Tên file ảnh tải xuống
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+          } catch (error) {
+              console.error("Lỗi:", error);
+          }
+      });
+      
+
+        // Xử lý sự kiện click vào nút Like
+        likeButton.on("click", function () {
+          const postId = $(this).data("id");
+          if (!userId || !postId) {
+              console.error("Thiếu userId hoặc postId!");
+              return;
+          }
+      
+          // Gửi request like
+          $.ajax({
+              url: `${apiUrl}/like`,
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              data: JSON.stringify({ userId, postId }),
+              success: () => {
+                // Kiểm tra nếu postId đã like -> xóa khỏi danh sách
+                const index = likedPosts.findIndex(post => post.post_id == postId);
+                if (index !== -1) {
+                    likedPosts.splice(index, 1);
+                    $(this).removeClass("liked");
+                } else {
+                    likedPosts.push({ post_id: postId }); // Thêm vào danh sách liked
+                    $(this).addClass("liked");
+                }
+            },
+              error: (error) => {
+                  console.error("Lỗi khi like ảnh:", error);
+              },
+          });
+      });
+        fetchImages();
+        fetchUserLikedPosts();
+      });
+    </script>
+  </body>
+</html>

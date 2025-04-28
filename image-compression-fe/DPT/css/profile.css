@@ -1,0 +1,207 @@
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-avatar {
+    background: #e60023;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+}
+.user-avatar:hover{
+    transform: scale(1.03);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+.search-box{
+    width: 80%;
+}
+.navbar-light {
+    position: fixed;
+    top: 0;
+    left: 80px;
+    right: 0;
+    height: 60px;
+    background: #f8f8f8;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+.main-content {
+    margin-left: 70px; /* Đẩy nội dung sang phải bằng chiều rộng sidebar */
+    transition: margin-left 0.3s ease-in-out; /* Hiệu ứng mượt */
+    margin-top: 100px;
+}
+.sidebar {
+    width: 70px;
+    height: 100vh;
+    background: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    z-index: 1002;
+}
+
+.sidebar a {
+    color: #333;
+    font-size: 22px;
+    margin: 20px 0;
+    text-decoration: none;
+    position: relative;
+    transition: color 0.3s ease-in-out;
+}
+
+.sidebar a:hover {
+    color: #000;
+}
+
+/* Sidebar cài đặt bên phải */
+.settings-sidebar {
+    position: fixed;
+    top: 0;
+    right: -300px;
+    width: 300px;
+    height: 100vh;
+    background: #fff;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    transition: right 0.3s ease-in-out;
+    z-index: 1003;
+}
+
+/* Khi sidebar cài đặt mở */
+.settings-sidebar.active {
+    right: 0;
+}
+
+/* Overlay che toàn bộ trang khi mở sidebar */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    z-index: 1002;
+}
+
+/* Khi mở sidebar, hiển thị overlay */
+.overlay.active {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Responsive: Hiển thị dạng ẩn sidebar trên mobile */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 60px;
+    }
+
+    .grid {
+        column-count: 2;
+    }
+}
+
+
+
+/* Định dạng cho image-card */
+.image-card {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Overlay khi hover */
+.image-card .overlayImg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Định dạng trái tim */
+.image-card .heart-icon {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    font-size: 20px;
+    opacity: 0;
+    color: red;
+    transition: opacity 0.3s ease, transform 0.2s ease;
+}
+
+/* Trạng thái chưa thích (màu trắng) */
+.image-card .heart-icon.unliked {
+    color: white;
+}
+
+/* Định dạng icon xóa */
+.image-card .delete-icon {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    font-size: 20px;
+    opacity: 0;
+    color: white;
+    transition: opacity 0.3s ease, transform 0.2s ease;
+}
+
+/* Định dạng title */
+.image-card .post-title {
+    position: absolute;
+    top: 10px; /* Cách đỉnh 10px */
+    left: 10px; /* Cách trái 10px */
+    color: white; /* Màu trắng để nổi trên ảnh */
+    font-size: 16px; /* Kích thước chữ */
+    font-weight: bold; /* Đậm để dễ đọc */
+    max-width: 80%; /* Giới hạn chiều rộng để không tràn */
+    white-space: nowrap; /* Không xuống dòng */
+    overflow: hidden; /* Ẩn phần vượt quá */
+    text-overflow: ellipsis; /* Thêm dấu ... khi quá dài */
+    opacity: 0; /* Ẩn mặc định */
+    transition: opacity 0.3s ease; /* Hiệu ứng mượt mà */
+}
+
+/* Khi hover vào image-card, hiển thị overlay, trái tim, icon xóa và title */
+.image-card:hover .overlayImg,
+.image-card:hover .heart-icon,
+.image-card:hover .delete-icon,
+.image-card:hover .post-title {
+    opacity: 1;
+}
+
+/* Khi hover vào trái tim hoặc icon xóa, hiện chỉ tay */
+.image-card .heart-icon:hover,
+.image-card .delete-icon:hover {
+    cursor: pointer;
+    transform: scale(1.2);
+}
+
+/* Đảm bảo ảnh responsive */
+.image-card img {
+    width: 100%;
+    height: auto;
+}

@@ -1,0 +1,78 @@
+/* Sidebar bên trái */
+.sidebar {
+    width: 70px;
+    height: 100vh;
+    background: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    z-index: 1002;
+}
+
+.sidebar a {
+    color: #333;
+    font-size: 22px;
+    margin: 20px 0;
+    text-decoration: none;
+    position: relative;
+    transition: color 0.3s ease-in-out;
+}
+
+.sidebar a:hover {
+    color: #000;
+}
+
+/* Sidebar cài đặt bên phải */
+.settings-sidebar {
+    position: fixed;
+    top: 0;
+    right: -300px;
+    width: 300px;
+    height: 100vh;
+    background: #fff;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    transition: right 0.3s ease-in-out;
+    z-index: 1003;
+}
+
+/* Khi sidebar cài đặt mở */
+.settings-sidebar.active {
+    right: 0;
+}
+
+/* Overlay che toàn bộ trang khi mở sidebar */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    z-index: 1002;
+}
+
+/* Khi mở sidebar, hiển thị overlay */
+.overlay.active {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Responsive: Hiển thị dạng ẩn sidebar trên mobile */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 60px;
+    }
+
+    .grid {
+        column-count: 2;
+    }
+}

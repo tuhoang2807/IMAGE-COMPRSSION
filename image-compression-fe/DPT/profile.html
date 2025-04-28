@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ý tưởng đã lưu</title>
+
+    <!-- Bootstrap & FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="./css/profile.css">
+</head>
+<body>
+
+<!-- Sidebar bên trái -->
+<div class="sidebar">
+    <a href="#"><i class="bi bi-images text-danger fs-2"></i></a>
+    <a href="./index.html"><i class="bi bi-house-door"></i></a>
+    <a href="./upload.html"><i class="bi bi-plus-circle"></i></a>
+    <a href="./profile.html"><i class="bi bi-person"></i></a>
+    <a href="#" onclick="toggleSidebar()"><i class="bi bi-gear"></i></a>
+</div>
+
+<!-- Overlay -->
+<div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
+
+<!-- Sidebar cài đặt -->
+<div id="settingsSidebar" class="settings-sidebar">
+    <button class="close-btn btn btn-light" onclick="toggleSidebar()">✖</button>
+    <a href="register.html" class="btn btn-danger w-100 mt-3">Đăng xuất</a>
+</div>
+
+<!-- Nội dung chính -->
+<div class="main-content">
+    <!-- Thanh điều hướng -->
+    <nav class="navbar navbar-light bg-light px-3 d-flex justify-content-between">
+        <div class="d-flex align-items-center">
+            <button class="btn btn-outline-secondary">Ghim của bạn</button>
+            <div class="user-avatar ms-3">N</div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h3 class="mb-3">Ý tưởng bạn đã lưu</h3>
+
+        <!-- Tabs -->
+        <ul class="nav nav-pills" id="postTabs">
+            <li class="nav-item">
+                <a class="nav-link active" id="liked-tab" href="#" data-type="liked">Yêu thích</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="created-tab" href="#" data-type="created">Do bạn tạo</a>
+            </li>
+        </ul>
+
+        <!-- Bộ lọc -->
+       
+
+        <!-- Danh sách ảnh -->
+        <div class="row mt-4" id="image-container">
+            <!-- Ảnh sẽ được thêm vào đây bằng JavaScript -->
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap & JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Định nghĩa apiUrl
+    const apiUrl = "http://localhost:5000/api/images";
+
+    // JavaScript code to fetch and display posts
+    document.addEventListener("DOMContentLoaded", () => {
+        const userData = localStorage.getItem("userData");
+        if (!userData) {
+            window.location.href = "/login.html";
+        } else {
+            const userObject = JSON.parse(userData);
+            const userId = userObject.user.id;
+            const token = userObject.token;
+
+            // Load liked posts mặc định
+            fetchPosts("liked", userId, token);
+
+            // Thêm sự kiện click cho các tab
+            document.querySelectorAll("#postTabs .nav-link").forEach(tab => {
+                tab.addEventListener("click", function(e) {
+                    e.preventDefault();
+                    document.querySelectorAll("#postTabs .nav-link").forEach(t => t.classList.remove("active"));
+                    this.classList.add("active");
+
+                    const type = this.getAttribute("data-type");
+                    fetchPosts(type, userId, token);
+                });
+            });
+        }
+    });
+
+    function fetchPosts(type, userId, token) {
+        const endpoint = type === "liked" ? `${apiUrl}/liked-posts/${userId}` : `${apiUrl}/my-posts/${userId}`;
+        fetch(endpoint, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(`Danh sách bài viết (${type}):`, data);
+            renderPosts(data.posts || data.likedPosts, userId, token, type);
+        })
+        .catch(error => console.error(`Lỗi khi lấy danh sách bài viết (${type}):`, error));
+    }
+
+    function renderPosts(posts, userId, token, type) {
+        const imageContainer = document.getElementById("image-container");
+        imageContainer.innerHTML = ""; // Xóa nội dung cũ
+    
+        if (!posts || !posts.length) {
+            imageContainer.innerHTML = `<p class='text-center text-muted'>${type === "liked" ? "Bạn chưa thích bài viết nào." : "Bạn chưa tạo bài viết nào."}</p>`;
+            return;
+        }
+    
+        posts.forEach(post => {
+            const postHTML = `
+                <div class="col-md-3">
+                    <div class="image-card">
+                        <img src="${post.image_url}" alt="Ghim" class="img-fluid">
+                        <div class="overlayImg"></div>
+                        <span class="post-title">${post.title}</span>
+                        <i class="fas fa-heart heart-icon ${type === 'liked' ? '' : 'unliked'}" data-post-id="${post.post_id}"></i>
+                        ${type === 'created' ? `<i class="fas fa-trash delete-icon" data-post-id="${post.post_id}"></i>` : ''}
+                    </div>
+                </div>
+            `;
+            imageContainer.innerHTML += postHTML;
+        });
+    
+        // Thêm sự kiện click cho tất cả nút like
+        document.querySelectorAll(".heart-icon").forEach(heart => {
+            heart.addEventListener("click", function() {
+                const postId = this.getAttribute("data-post-id");
+                toggleLike(postId, userId, token, this);
+            });
+        });
+    
+        // Thêm sự kiện click cho tất cả nút xóa (chỉ có ở tab "created")
+        document.querySelectorAll(".delete-icon").forEach(trash => {
+            trash.addEventListener("click", function() {
+                const postId = this.getAttribute("data-post-id");
+                deletePost(postId, userId, token, this);
+            });
+        });
+    }
+
+    function toggleLike(postId, userId, token, heartElement) {
+        const isLiked = !heartElement.classList.contains("unliked");
+
+        fetch(`${apiUrl}/like`, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ userId, postId })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Lỗi khi gọi API like");
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                if (isLiked) {
+                    heartElement.classList.add("unliked"); // Trắng (bỏ thích)
+                } else {
+                    heartElement.classList.remove("unliked"); // Đỏ (thích lại)
+                }
+            }
+        })
+        .catch(error => {
+            console.error("Lỗi khi thích/bỏ thích bài viết:", error);
+            alert("Đã có lỗi xảy ra, vui lòng thử lại!");
+        });
+    }
+
+    function deletePost(postId, userId, token, trashElement) {
+        if (confirm("Bạn có chắc muốn xóa bài viết này không?")) {
+            fetch(`${apiUrl}/delete`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ userId, postId })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Lỗi khi gọi API delete");
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Xóa phần tử khỏi giao diện
+                    trashElement.closest(".col-md-3").remove();
+                    alert("Xóa bài viết thành công!");
+                }
+            })
+            .catch(error => {
+                console.error("Lỗi khi xóa bài viết:", error);
+                alert("Đã có lỗi xảy ra, vui lòng thử lại!");
+            });
+        }
+    }
+</script>
+
+</body>
+</html>

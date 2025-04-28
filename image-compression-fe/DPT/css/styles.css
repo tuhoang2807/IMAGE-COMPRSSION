@@ -1,0 +1,197 @@
+/* Sidebar */
+.sidebar {
+    width: 70px;
+    height: 100vh;
+    background: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    z-index: 1001;
+}
+
+.sidebar a {
+    color: #111;
+    font-size: 22px;
+    margin: 20px 0;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.sidebar a:hover {
+    color: #000;
+}
+
+/* Overlay */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    z-index: 1000;
+}
+
+.overlay.active {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Sidebar cài đặt */
+.settings-sidebar {
+    position: fixed;
+    top: 0;
+    right: -300px;
+    width: 300px;
+    height: 100vh;
+    background: #fff;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    transition: right 0.3s ease-in-out;
+    z-index: 1001;
+}
+
+.settings-sidebar.active {
+    right: 0;
+}
+
+
+/* Main content */
+.main-content {
+    margin-left: 100px;
+    padding: 80px 20px 20px; /* Để tránh bị navbar che */
+}
+
+/* Navbar */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 80px;
+    right: 0;
+    height: 60px;
+    background: #f8f8f8;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+/* Search bar */
+.search-container {
+    display: flex;
+    align-items: center;
+    background: #e9e9e9;
+    padding: 8px 15px;
+    border-radius: 20px;
+    width: 400px;
+    transition: background 0.3s;
+}
+
+.search-container:hover {
+    background: #ddd;
+}
+
+.search-container i {
+    color: #666;
+    margin-right: 10px;
+}
+
+.search-box {
+    border: none;
+    outline: none;
+    background: transparent;
+    flex: 1;
+    font-size: 16px;
+}
+
+/* Avatar người dùng */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-avatar {
+    background: #e60023;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* Grid Masonry */
+.grid {
+    column-count: 4;
+    column-gap: 15px;
+    padding: 10px;
+    margin-top: 20px;
+}
+
+.grid img {
+    width: 100%;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    display: block;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.grid img:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .grid {
+        column-count: 3;
+    }
+
+    .search-container {
+        width: 300px;
+    }
+}
+
+@media (max-width: 768px) {
+    .grid {
+        column-count: 2;
+    }
+
+    .main-content {
+        margin-left: 80px;
+        padding: 70px 15px 15px;
+    }
+
+    .search-container {
+        width: 250px;
+    }
+}
+
+@media (max-width: 480px) {
+    .grid {
+        column-count: 1;
+    }
+
+    .navbar {
+        padding: 0 10px;
+    }
+
+    .search-container {
+        width: 200px;
+    }
+}

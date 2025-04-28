@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký</title>
+
+    <!-- Bootstrap & FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <!-- Link đến file CSS -->
+    <link rel="stylesheet" href="./css/register.css">
+</head>
+<body>
+<div class="card shadow p-4 rounded-3">
+    <h4 class="text-center">Đăng ký</h4>
+
+    <form id="register-form">
+        <div class="mb-3">
+            <label class="form-label">Tên tài khoản</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                <input type="text" id="username" class="form-control" placeholder="Nhập tên tài khoản" required>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Email</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                <input type="email" id="email" class="form-control" placeholder="Nhập email" required>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Mật khẩu</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                <input type="password" id="password" class="form-control" placeholder="Mật khẩu (ít nhất 6 ký tự, có ký tự đặc biệt)" required>
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-primary w-100" onclick="registerUser()">Đăng ký</button>
+        <p class="text-danger mt-2 text-center" id="error-message" style="display: none;"></p>
+        <p class="text-success mt-2 text-center" id="success-message" style="display: none;"></p>
+    </form>
+    
+    <p class="text-center mt-3">Đã có tài khoản? <a href="login.html">Đăng nhập</a></p>
+</div>
+
+<!-- Bootstrap & JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    async function registerUser() {
+        const username = document.getElementById("username").value;
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const errorMessage = document.getElementById("error-message");
+        const successMessage = document.getElementById("success-message");
+
+        try {
+            const response = await fetch("http://localhost:5000/api/auth/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ username, email, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                successMessage.textContent = "Đăng ký thành công! Đang chuyển hướng...";
+                successMessage.style.display = "block";
+                errorMessage.style.display = "none";
+
+                setTimeout(() => {
+                    window.location.href = "login.html"; // Chuyển hướng đến trang đăng nhập
+                }, 2000);
+            } else {
+                errorMessage.textContent = data.message || "Đăng ký thất bại!";
+                errorMessage.style.display = "block";
+                successMessage.style.display = "none";
+            }
+        } catch (error) {
+            console.error("Lỗi đăng ký:", error);
+            errorMessage.textContent = "Lỗi máy chủ. Vui lòng thử lại!";
+            errorMessage.style.display = "block";
+        }
+    }
+</script>
+</body>
+</html>
